@@ -69,5 +69,3 @@ HuffmanTree *create_huffman_tree(MinHeap *h) {
     return h->arr[0];
 
 }
-
-// hay que añadir alguna forma de visualizarlo para casos pequeños

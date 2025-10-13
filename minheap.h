@@ -12,7 +12,8 @@ typedef struct MinHeap {
 
 
 MinHeap *create_minheap();
-void min_heapify(MinHeap *h, int i);
+void heapify_down(MinHeap *h, int i);
+void heapify_up(MinHeap *h, int i);
 void insert_key(MinHeap *h, HuffmanTree *key);
 HuffmanTree *extract_min(MinHeap *h);
 HuffmanTree *get_min(MinHeap *h);

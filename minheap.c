@@ -2,8 +2,6 @@
 #include "minheap.h"
 #include <stdlib.h>
 
-// extract_min e insert_key testeados por separado queda testear a la vez 
-
 int parent(int i) {
     return (i - 1) / 2;
 }
@@ -34,7 +32,7 @@ MinHeap *create_minheap() {
     return minheap;
 }
 
-void min_heapify(MinHeap *h, int i) {
+void heapify_down(MinHeap *h, int i) {
     int l = left_child(i);
     int r = right_child(i);
     int smallest = i;
@@ -48,7 +46,16 @@ void min_heapify(MinHeap *h, int i) {
 
     if (smallest != i) {
         swap(h->arr[i], h->arr[smallest]);
-        min_heapify(h, smallest);
+        heapify_down(h, smallest);
+    }
+}
+
+void heapify_up(MinHeap *h, int i) {
+    
+    while (i > 0 && is_less(h->arr[i], h->arr[parent(i)])) {
+        swap(h->arr[i], h->arr[parent(i)]);
+        
+        i = parent(i);
     }
 }
 
@@ -62,7 +69,7 @@ void insert_key(MinHeap *h, HuffmanTree *key) {
     int i = h->size - 1;
     h->arr[i] = key;
 
-    min_heapify(h, 0);
+    heapify_up(h, i);
 }
 
 HuffmanTree *extract_min(MinHeap *h) {
@@ -79,7 +86,7 @@ HuffmanTree *extract_min(MinHeap *h) {
     h->arr[0] = h->arr[h->size - 1];
     h->size--;
 
-    min_heapify(h, 0);
+    heapify_down(h, 0);
 
     return root;
 }

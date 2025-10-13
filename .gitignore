@@ -3,3 +3,4 @@
 test*
 Makefile
 main
+print_minheap.*
