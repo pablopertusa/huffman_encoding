@@ -1,8 +1,6 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "huffman.h"
-#include "minheap.h"
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
     if (t1 == NULL || t2 == NULL) {
@@ -46,26 +44,4 @@ HuffmanTree *create_leaf(int weight) {
     new_leaf->right = NULL;
     new_leaf->is_leaf = true;
     return new_leaf;
-}
-
-HuffmanTree *create_huffman_tree(MinHeap *h) {
-    if (h == NULL) {
-        printf("Minheap used is NULL\n");
-        return NULL;
-    }
-    if (h->size == 0) {
-        printf("Minheap is empty\n");
-        return NULL;
-    }
-    HuffmanTree *t1;
-    HuffmanTree *t2;
-    HuffmanTree *new;
-    while (h->size > 1) {
-        t1 = extract_min(h);
-        t2 = extract_min(h);
-        new = merge_trees(t1, t2);
-        insert_key(h, new);
-    }
-    return h->arr[0];
-
 }

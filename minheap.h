@@ -3,7 +3,7 @@
 
 #include "huffman.h"
 
-#define MAX_SIZE 100
+#define MAX_SIZE 128
 
 typedef struct MinHeap {
     HuffmanTree* arr[MAX_SIZE];
