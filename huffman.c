@@ -45,3 +45,21 @@ HuffmanTree *create_leaf(int weight) {
     new_leaf->is_leaf = true;
     return new_leaf;
 }
+
+void recursive_codes(Code **array, HuffmanTree *root) {
+}
+
+Code **create_codes(HuffmanTree *tree, size_t n) {
+    if (n == 0 || tree == NULL) {
+        return NULL;
+    }
+
+    Code **codes_array = (Code **)malloc(sizeof(Code *) * n);
+    if (codes_array == NULL) {
+        printf("error allocating memory while creating the codes\n");
+    }
+
+
+
+    return codes_array;
+}

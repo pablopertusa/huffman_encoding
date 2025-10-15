@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     int c;
     while ((c = fgetc(file)) != EOF) {
         if (c > 127) {
-            printf("ERROR: leyendo un carácter que no solo es ASCII\n");
+            printf("ERROR: leyendo un carácter que no es ASCII\n");
             fclose(file);
             return 1;
         }
