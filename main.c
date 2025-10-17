@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
     if (minheap == NULL) {
         return 1;
     }
-    for (int i = 0; i < ENCODING_LENGTH; i++) {
-        temp = create_leaf(counter[i]);
+    for (char c = 0;;c++) {
+        temp = create_leaf(counter[c], c);
         insert_key(minheap,  temp);
     }
 
