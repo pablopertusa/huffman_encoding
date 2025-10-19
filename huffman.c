@@ -33,7 +33,7 @@ HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
     return new_tree;
 }
 
-HuffmanTree *create_leaf(int weight, char character) {
+HuffmanTree *create_leaf(int weight, unsigned char character) {
     HuffmanTree *new_leaf = (HuffmanTree *)malloc(sizeof(HuffmanTree));
     if (new_leaf == NULL) {
         printf("error allocating memory to leaf\n");
@@ -69,7 +69,7 @@ void recursive_codes(Code **array, HuffmanTree *node, uint32_t acum_code, int le
     }
 }
 
-Code **create_codes(HuffmanTree *tree, char n) {
+Code **create_codes(HuffmanTree *tree, int n) {
     if (n == 0 || tree == NULL) {
         return NULL;
     }
@@ -79,7 +79,7 @@ Code **create_codes(HuffmanTree *tree, char n) {
     if (codes_array == NULL) {
         printf("error allocating memory while creating the codes\n");
     }
-    for (char i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         Code *new_code = (Code *)malloc(sizeof(Code));
         if (new_code == NULL) {
             printf("error allocating memory while creating a code\n");

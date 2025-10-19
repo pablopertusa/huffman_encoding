@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     if (minheap == NULL) {
         return 1;
     }
-    for (char c = 0;;c++) {
+    for (unsigned char c = 0; c < ENCODING_LENGTH; c++) {
         temp = create_leaf(counter[c], c);
         insert_key(minheap,  temp);
     }
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         insert_key(minheap, merge);
     }
     final = extract_min(minheap);
-    printf("%d\n", final->weight); // es correcto
+    printf("%d\n", final->weight); // es correcto 2006599
 
     return 0;
 }

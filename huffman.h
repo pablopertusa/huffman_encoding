@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 typedef struct Code {
+    unsigned char character;
     int length;
     uint32_t bits;
 } Code;
@@ -13,7 +14,7 @@ typedef struct Code {
 typedef struct HuffmanTree {
     int weight;
     bool is_leaf;
-    char character;
+    unsigned char character;
     struct HuffmanTree *left;
     struct HuffmanTree *right;
 } HuffmanTree;
@@ -21,8 +22,8 @@ typedef struct HuffmanTree {
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2);
 HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2);
-HuffmanTree *create_leaf(int weight, char character);
-Code **create_codes(HuffmanTree *tree, char n);
+HuffmanTree *create_leaf(int weight, unsigned char character);
+Code **create_codes(HuffmanTree *tree, int n);
 void recursive_codes(Code **array, HuffmanTree *root, uint32_t acum_code, int length);
 
 #endif

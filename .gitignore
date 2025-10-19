@@ -1,7 +1,7 @@
 .vscode/
 *.o
-test*
 *.txt
+test
 Makefile
 main
 print_minheap.*
