@@ -10,6 +10,13 @@ int main(int argc, char** argv) {
         printf("file path must be provided\n");
         return 1;
     }
+    char *output;
+    if (argc == 3) {
+        output = argv[2];
+    }
+    else {
+        output = "out";
+    }
     char *filename = argv[1];
     char mode = 'r';
     FILE *file = fopen(filename, &mode);
@@ -39,8 +46,13 @@ int main(int argc, char** argv) {
         return 1;
     }
     for (unsigned char c = 0; c < ENCODING_LENGTH; c++) {
-        temp = create_leaf(counter[c], c);
-        insert_key(minheap,  temp);
+        if (counter[c] > 0) {
+            temp = create_leaf(counter[c], c);
+            insert_key(minheap,  temp);
+        }
+        else {
+            printf("INFO: saltando caracter %d\n", c);
+        }
     }
 
     // creamos el arbol de huffman
@@ -54,7 +66,19 @@ int main(int argc, char** argv) {
         insert_key(minheap, merge);
     }
     final = extract_min(minheap);
-    Code ** codes = create_codes(final, ENCODING_LENGTH);
+    Code **codes = create_codes(final, ENCODING_LENGTH);
+    if (codes == NULL) {
+        printf("NULL codes\n");
+        return 1;
+    }
+
+    FILE *out_file = fopen(output, "w");
+    if (out_file == NULL) {
+        printf("NULL output file\n");
+        return 1;
+    }
+    char *header = traverse_tree(final);
+    write_header(header, out_file);
 
     return 0;
 }

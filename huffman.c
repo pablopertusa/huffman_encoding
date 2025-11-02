@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "huffman.h"
+#include <string.h>
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
     if (t1 == NULL || t2 == NULL) {
@@ -98,12 +99,12 @@ Code **create_codes(HuffmanTree *tree, int n) {
 
 char *string_node(HuffmanTree *node) {
     if (node == NULL) {
-        return "#;";
+        return NULL;
     }
     int weight = node->weight;
     unsigned char character = node->character;
 
-    size_t buffer_size = 128;
+    size_t buffer_size = 32;
     char *buffer = (char *)malloc(buffer_size*sizeof(char));
 
     snprintf(buffer, buffer_size, "%c,%d;", character, weight);
@@ -111,13 +112,37 @@ char *string_node(HuffmanTree *node) {
     return buffer;
 }
 
-char *recursive_traverse(HuffmanTree *node) {
-    return NULL;
+void recursive_traverse(HuffmanTree *node, char *buffer) {
+    char *token = string_node(node);
+    if (token == NULL) {
+        return;
+    }
+    // POR HACER
+    // aquí falta manejar que el buffer se llene y haya que reasignar
+    strcat(buffer, token);
+    free(token);
+    if (node != NULL) {
+        recursive_traverse(node->left, buffer);
+        recursive_traverse(node->right, buffer);
+    }
 }
 
-
+// cualquier forma de viajar por el árbol vale porque luego voy a volver a construirlo, más ineficiente pero simple
 char *traverse_tree(HuffmanTree *tree) {
-    size_t memory_size = 4096;
-    char *m = (char *)malloc(memory_size * sizeof(char));
-    return NULL;
+    size_t memory_size = 1024 * 16;
+    char *buffer = (char *)malloc(memory_size * sizeof(char));
+    if (buffer == NULL) {
+        return NULL;
+    }
+    recursive_traverse(tree, buffer);
+    return buffer;
+}
+
+void write_header(char *header, FILE *out) {
+    if (header == NULL) {
+        printf("NULL header\n");
+        return;
+    }
+    fputs(header, out);
+    fputs(".", out);
 }
