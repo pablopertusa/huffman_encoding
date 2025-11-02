@@ -2,6 +2,6 @@
 *.o
 *.txt
 test
-Makefile
 main
 print_minheap.*
+cosas_por_hacer.md

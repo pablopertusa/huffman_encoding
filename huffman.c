@@ -7,10 +7,7 @@ bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
         printf("WARNING: una comparación ha recibido un tree a NULL\n");
         return false;
     }
-    else if (t1->weight < t2->weight) {
-        return true;
-    }
-    return false;
+    return t1->weight < t2->weight;
 }
 
 HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
@@ -53,12 +50,13 @@ void recursive_codes(Code **array, HuffmanTree *node, uint32_t acum_code, int le
         return;
     }
     HuffmanTree *r,*l;
-    // se añade un cero al final
+    // si es una hoja guardamos el código que llevamos hasta ahora
     if (node->is_leaf) {
         array[node->character]->bits = acum_code;
         array[node->character]->length = length;
         return;
     }
+    // se añade un cero al final
     if ((l = node->left) != NULL) {
         recursive_codes(array, node->left, acum_code << 1, length + 1);
     }
@@ -96,4 +94,30 @@ Code **create_codes(HuffmanTree *tree, int n) {
     recursive_codes(codes_array, tree, code, length);
 
     return codes_array;
+}
+
+char *string_node(HuffmanTree *node) {
+    if (node == NULL) {
+        return "#;";
+    }
+    int weight = node->weight;
+    unsigned char character = node->character;
+
+    size_t buffer_size = 128;
+    char *buffer = (char *)malloc(buffer_size*sizeof(char));
+
+    snprintf(buffer, buffer_size, "%c,%d;", character, weight);
+
+    return buffer;
+}
+
+char *recursive_traverse(HuffmanTree *node) {
+    return NULL;
+}
+
+
+char *traverse_tree(HuffmanTree *tree) {
+    size_t memory_size = 4096;
+    char *m = (char *)malloc(memory_size * sizeof(char));
+    return NULL;
 }

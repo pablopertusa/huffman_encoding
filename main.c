@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         insert_key(minheap, merge);
     }
     final = extract_min(minheap);
-    printf("%d\n", final->weight); // es correcto 2006599
+    Code ** codes = create_codes(final, ENCODING_LENGTH);
 
     return 0;
 }

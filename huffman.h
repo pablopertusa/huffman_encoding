@@ -25,5 +25,6 @@ HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2);
 HuffmanTree *create_leaf(int weight, unsigned char character);
 Code **create_codes(HuffmanTree *tree, int n);
 void recursive_codes(Code **array, HuffmanTree *root, uint32_t acum_code, int length);
+char *traverse_tree(HuffmanTree *tree);
 
 #endif
