@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 EXEC = main
 
-OBJS = main.o huffman.o minheap.o
+OBJS = main.o huffman.o minheap.o utils.o
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
@@ -15,3 +15,6 @@ huffman.o: huffman.c huffman.h minheap.h
 
 minheap.o: minheap.c minheap.h huffman.h
 	$(CC) $(CFLAGS) -c minheap.c
+
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) -c utils.c

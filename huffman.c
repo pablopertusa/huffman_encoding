@@ -146,3 +146,14 @@ void write_header(char *header, FILE *out) {
     fputs(header, out);
     fputs(".", out);
 }
+
+int any_overflow(Code **codes, int encoding_length) {
+    Code *code;
+    for (int i = 0; i < encoding_length; i++) {
+        code = codes[i];
+        if (code->length > 32) {
+            return 1;
+        }
+    }
+    return 0;
+}

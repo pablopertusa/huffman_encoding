@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include "huffman.h"
 #include "minheap.h"
+#include "utils.h"
 
 #define ENCODING_LENGTH 128 // el texto puede no ser solo ASCII pero vamos a suponer que lo es de momento
 
 int main(int argc, char** argv) {
+
+    bool debug = 0;
 
     if (argc < 2) {
         printf("file path must be provided\n");
@@ -50,7 +53,7 @@ int main(int argc, char** argv) {
             temp = create_leaf(counter[c], c);
             insert_key(minheap,  temp);
         }
-        else {
+        else if (debug){
             printf("INFO: saltando caracter %d\n", c);
         }
     }
@@ -71,6 +74,13 @@ int main(int argc, char** argv) {
         printf("NULL codes\n");
         return 1;
     }
+    // vamos a ver si ha habido overflow en los códigos
+    int check = any_overflow(codes, ENCODING_LENGTH);
+    if (check == 1) {
+        printf("overflow generating codes\n");
+        return 1;
+    }
+
 
     FILE *out_file = fopen(output, "w");
     if (out_file == NULL) {
@@ -79,6 +89,33 @@ int main(int argc, char** argv) {
     }
     char *header = traverse_tree(final);
     write_header(header, out_file);
+    fclose(out_file);
+
+    EncodingBuffer *encoding_buffer = create_buffer();
+    if (encoding_buffer == NULL) {
+        return 1;
+    }
+    int read_c;
+    Code *code;
+    FILE *read_file = fopen(filename, "r");
+    if (read_file == NULL) {
+        printf("NULL input file\n");
+        return 1;
+    }
+    FILE *write_file = fopen(output, "wb");
+    if (write_file == NULL) {
+        printf("NULL output file\n");
+        return 1;
+    }
+    while ((read_c = getc(read_file)) != EOF) {
+        code = codes[read_c];
+        if (code->length > (64 - encoding_buffer->used)) {
+            write_buffer(encoding_buffer, write_file);
+        }
+        append_buffer(encoding_buffer, code->bits, code->length);
+    }
+    fclose(read_file);
+    fclose(write_file);
 
     return 0;
 }
