@@ -2,15 +2,14 @@
 #include "huffman.h"
 #include "minheap.h"
 #include "utils.h"
+#include <stdlib.h>
 
 #define ENCODING_LENGTH 128 // el texto puede no ser solo ASCII pero vamos a suponer que lo es de momento
 
 int main(int argc, char** argv) {
 
-    bool debug = 0;
-
     if (argc < 2) {
-        printf("file path must be provided\n");
+        fprintf(stderr, "file path must be provided\n");
         return 1;
     }
     char *output;
@@ -22,24 +21,25 @@ int main(int argc, char** argv) {
     }
     char *filename = argv[1];
     char mode = 'r';
-    FILE *file = fopen(filename, &mode);
-    if (file == NULL) {
-        printf("error reading file\n");
+    FILE *read_file = fopen(filename, &mode);
+    if (read_file == NULL) {
+        perror("error reading file");
+        fclose(read_file);
         return 1;
     }
 
     // contamos las frecuencias
     long counter[ENCODING_LENGTH] = {0};
     int c;
-    while ((c = fgetc(file)) != EOF) {
+    while ((c = fgetc(read_file)) != EOF) {
         if (c > 127) {
-            printf("ERROR: leyendo un carácter que no es ASCII\n");
-            fclose(file);
+            fprintf(stderr, "ERROR: leyendo un carácter que no es ASCII\n");
+            fclose(read_file);
             return 1;
         }
         counter[c]++;
     }
-    fclose(file);
+    fclose(read_file);
 
     // ahora creamos una hoja para cada uno de los carácteres y el minheap para llevar la prioridad
     HuffmanTree *temp;
@@ -52,9 +52,6 @@ int main(int argc, char** argv) {
         if (counter[c] > 0) {
             temp = create_leaf(counter[c], c);
             insert_key(minheap,  temp);
-        }
-        else if (debug){
-            printf("INFO: saltando caracter %d\n", c);
         }
     }
 
@@ -69,27 +66,32 @@ int main(int argc, char** argv) {
         insert_key(minheap, merge);
     }
     final = extract_min(minheap);
+    free(minheap);
+    minheap = NULL;
     Code **codes = create_codes(final, ENCODING_LENGTH);
     if (codes == NULL) {
-        printf("NULL codes\n");
+        fprintf(stderr, "NULL codes\n");
         return 1;
     }
     // vamos a ver si ha habido overflow en los códigos
     int check = any_overflow(codes, ENCODING_LENGTH);
     if (check == 1) {
-        printf("overflow generating codes\n");
+        fprintf(stderr, "overflow generating codes\n");
         return 1;
     }
 
 
-    FILE *out_file = fopen(output, "w");
-    if (out_file == NULL) {
-        printf("NULL output file\n");
+    FILE *write_file = fopen(output, "w");
+    if (write_file == NULL) {
+        perror("NULL output file");
+        fclose(write_file);
         return 1;
     }
-    char *header = traverse_tree(final);
-    write_header(header, out_file);
-    fclose(out_file);
+    char *header_string = traverse_tree(final);
+    free_tree(final);
+    final = NULL;
+    write_header(header_string, write_file);
+    fclose(write_file);
 
     EncodingBuffer *encoding_buffer = create_buffer();
     if (encoding_buffer == NULL) {
@@ -97,25 +99,49 @@ int main(int argc, char** argv) {
     }
     int read_c;
     Code *code;
-    FILE *read_file = fopen(filename, "r");
+    read_file = fopen(filename, "r");
     if (read_file == NULL) {
-        printf("NULL input file\n");
+        perror("NULL input file");
+        fclose(read_file);
         return 1;
     }
-    FILE *write_file = fopen(output, "wb");
+    write_file = fopen(output, "ab");
     if (write_file == NULL) {
-        printf("NULL output file\n");
+        perror("NULL output file");
+        fclose(write_file);
         return 1;
     }
     while ((read_c = getc(read_file)) != EOF) {
         code = codes[read_c];
-        if (code->length > (64 - encoding_buffer->used)) {
+        if (code->length > (ENCODING_BUFFER_LENGTH - encoding_buffer->used)) {
             write_buffer(encoding_buffer, write_file);
         }
         append_buffer(encoding_buffer, code->bits, code->length);
     }
     fclose(read_file);
     fclose(write_file);
+    free_codes(codes, ENCODING_LENGTH);
+    codes = NULL;
+    free(encoding_buffer);
+    encoding_buffer = NULL;
+
+    // ahora vamos a hacer el decoder
+    read_file = fopen(output, "r");
+    if (read_file == NULL) {
+        perror("ERROR reading output file for decoding");
+        fclose(read_file);
+        return 1;
+    }
+
+    header_string = read_header(read_file);
+    if (header_string == NULL) {
+        fprintf(stderr, "ERROR null header\n");
+        return 1;
+    }
+    fclose(read_file);
+
+    // por implementar
+    //HuffmanTree *header_tree = create_tree_from_header(header_string);
 
     return 0;
 }

@@ -45,6 +45,16 @@ HuffmanTree *create_leaf(int weight, unsigned char character) {
     return new_leaf;
 }
 
+void free_tree(HuffmanTree *node) {
+    if (node == NULL) {
+        return;
+    }
+    free_tree(node->left);
+    free_tree(node->right);
+
+    free(node);
+}
+
 void recursive_codes(Code **array, HuffmanTree *node, uint32_t acum_code, int length) {
     if (node == NULL || array == NULL) {
         printf("recursive codes received NULL");
@@ -95,6 +105,20 @@ Code **create_codes(HuffmanTree *tree, int n) {
     recursive_codes(codes_array, tree, code, length);
 
     return codes_array;
+}
+
+void free_codes(Code **codes_array, int n) {
+    if (codes_array == NULL || n <= 0) {
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (codes_array[i] != NULL) {
+            free(codes_array[i]);
+            codes_array[i] = NULL;
+        }
+    }
+    free(codes_array);
 }
 
 char *string_node(HuffmanTree *node) {

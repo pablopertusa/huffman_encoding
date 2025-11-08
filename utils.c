@@ -56,3 +56,35 @@ void write_buffer(EncodingBuffer *buffer, FILE *output) {
         buffer->data = 0;
     }
 }
+
+char *read_header(FILE *input) {
+    if (input == NULL) {
+        fprintf(stderr, "ERROR null input to read the header");
+        return NULL;
+    }
+    int initial_size = 128;
+    char *buffer = (char *)malloc(initial_size * sizeof(char));
+    if (buffer == NULL) {
+        perror("ERROR allocating while reading header");
+        return NULL;
+    }
+    int c, buffer_size, buffer_used;
+    buffer_size = initial_size;
+    buffer_used = 0;
+    char *temp;
+    // el . marca el final de header
+    while ((c = getc(input)) != EOF && c != '.') {
+        if (buffer_used >= buffer_size - 1) {
+            buffer_size *= 2;
+            temp = (char *)realloc(buffer, buffer_size * sizeof(char));
+            if (temp == NULL) {
+                perror("ERROR allocating temporal memory while reading header");
+                return NULL;
+            }
+            buffer = temp;
+        }
+        buffer[buffer_used++] = (char)c;
+    }
+    buffer[buffer_used] = '\0';
+    return buffer;
+}
