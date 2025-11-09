@@ -140,8 +140,7 @@ int main(int argc, char** argv) {
     }
     fclose(read_file);
 
-    // por implementar
-    //HuffmanTree *header_tree = create_tree_from_header(header_string);
+    HuffmanTree *header_tree = create_tree_from_header(header_string);
 
     return 0;
 }

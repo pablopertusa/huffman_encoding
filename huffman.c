@@ -128,10 +128,16 @@ char *string_node(HuffmanTree *node) {
     int weight = node->weight;
     unsigned char character = node->character;
 
-    size_t buffer_size = 32;
+    size_t buffer_size = 128;
     char *buffer = (char *)malloc(buffer_size*sizeof(char));
+    if (buffer == NULL) {
+        fprintf(stderr, "ERROR allocating memory while string_node\n");
+        return NULL;
+    }
 
-    snprintf(buffer, buffer_size, "%c,%d;", character, weight);
+    char record_sep = 30;
+    char group_sep = 29;
+    snprintf(buffer, buffer_size, "%c%c%d%c", character, record_sep, weight, group_sep);
 
     return buffer;
 }
@@ -168,7 +174,7 @@ void write_header(char *header, FILE *out) {
         return;
     }
     fputs(header, out);
-    fputs(".", out);
+    fputs("##", out);
 }
 
 int any_overflow(Code **codes, int encoding_length) {
@@ -180,4 +186,36 @@ int any_overflow(Code **codes, int encoding_length) {
         }
     }
     return 0;
+}
+
+HuffmanTree *create_tree_from_header(char *header) {
+    if (header == NULL) {
+        fprintf(stderr, "ERROR null header while creating the tree\n");
+        return NULL;
+    }
+    char *copy = strdup(header);
+    if (copy == NULL) {
+        fprintf(stderr, "ERROR allocating while duplicating string\n");
+        return NULL;
+    }
+
+    // delimitador principal
+    char *token = strtok(copy, "\x1D");
+
+    while (token != NULL) {
+        int count;
+        char character;
+
+        if (sscanf(token, "%c\x1E%d", &character, &count) == 2) {
+            printf("%c-%d\n", character, count);
+        }
+        else if (strcmp(token, "##") != 0) {
+            fprintf(stderr, "ERROR format not matched while reading header, token: %s\n", token);
+            return NULL;
+        }
+        token = strtok(NULL, "\x1D");
+    }
+
+    free(copy);
+    return NULL;
 }

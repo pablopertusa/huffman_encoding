@@ -72,8 +72,10 @@ char *read_header(FILE *input) {
     buffer_size = initial_size;
     buffer_used = 0;
     char *temp;
+    char last = '\0';
+    char current;
     // el . marca el final de header
-    while ((c = getc(input)) != EOF && c != '.') {
+    while ((c = getc(input)) != EOF) {
         if (buffer_used >= buffer_size - 1) {
             buffer_size *= 2;
             temp = (char *)realloc(buffer, buffer_size * sizeof(char));
@@ -83,7 +85,12 @@ char *read_header(FILE *input) {
             }
             buffer = temp;
         }
-        buffer[buffer_used++] = (char)c;
+        current = (char)c;
+        buffer[buffer_used++] = current;
+        if (last == '#' && current == '#') {
+            break;
+        }
+        last = current;
     }
     buffer[buffer_used] = '\0';
     return buffer;
