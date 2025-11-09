@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include "huffman.h"
 #include <string.h>
+#include "minheap.h"
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
     if (t1 == NULL || t2 == NULL) {
         printf("WARNING: una comparación ha recibido un tree a NULL\n");
         return false;
+    }
+    else if (t1->weight == t2->weight) {
+        return t1->character < t2->character;
     }
     return t1->weight < t2->weight;
 }
@@ -27,8 +31,33 @@ HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
     new_tree->weight = t1->weight + t2->weight;
     new_tree->left = t1;
     new_tree->right = t2;
+    // ponemos un char que es un placeholder, esto es para que la creación del árbol sea única
+    new_tree->character = 'm';
 
     return new_tree;
+}
+
+bool equal_trees(HuffmanTree *t1, HuffmanTree *t2) {
+    if (t1 == NULL && t2 == NULL) {
+        return true;
+    }
+    else if (t1 == NULL || t2 == NULL) {
+        printf("uno es nulo y el otro no\n");
+        return false;
+    }
+    bool is_leaf_1 = t1->is_leaf;
+    bool is_leaf_2 = t2->is_leaf;
+    if (is_leaf_1 && is_leaf_2) {
+        if (t1->character == t2->character && t1->weight == t2->weight) {
+            return true && equal_trees(t1->left, t2->left) && equal_trees(t1->right, t2->right);
+        }
+    }
+    else if (!is_leaf_1 && !is_leaf_2) {
+        return true && equal_trees(t1->left, t2->left) && equal_trees(t1->right, t2->right);
+    }
+    printf("w: %d, char: %c, is_leaf: %d\n", t1->weight, t1->character, t1->is_leaf);
+    printf("w: %d, char: %c, is_leaf: %d\n", t2->weight, t2->character, t2->is_leaf);
+    return false;
 }
 
 HuffmanTree *create_leaf(int weight, unsigned char character) {
@@ -143,15 +172,20 @@ char *string_node(HuffmanTree *node) {
 }
 
 void recursive_traverse(HuffmanTree *node, char *buffer) {
-    char *token = string_node(node);
-    if (token == NULL) {
+    if (node == NULL) {
         return;
     }
-    // POR HACER
-    // aquí falta manejar que el buffer se llene y haya que reasignar
-    strcat(buffer, token);
-    free(token);
-    if (node != NULL) {
+    else if (node->is_leaf) {
+        char *token = string_node(node);
+        if (token == NULL) {
+            return;
+        }
+        // POR HACER
+        // aquí falta manejar que el buffer se llene y haya que reasignar
+        strcat(buffer, token);
+        free(token);
+    }
+    else {
         recursive_traverse(node->left, buffer);
         recursive_traverse(node->right, buffer);
     }
@@ -188,6 +222,31 @@ int any_overflow(Code **codes, int encoding_length) {
     return 0;
 }
 
+HuffmanTree *create_tree_from_minheap(MinHeap *minheap) {
+    if (minheap == NULL) {
+        fprintf(stderr, "ERROR null minheap while creating tree\n");
+        return NULL;
+    }
+    if (minheap->size == 0) {
+        return NULL; 
+    }
+    HuffmanTree *aux1, *aux2, *merge, *final;
+    int size;
+
+    while ((size = minheap->size) > 1) {
+        aux1 = extract_min(minheap);
+        aux2 = extract_min(minheap);
+        merge = merge_trees(aux1, aux2);
+        if (merge == NULL) {
+            fprintf(stderr, "ERROR null merge creating the tree\n");
+            return NULL;
+        }
+        insert_key(minheap, merge);
+    }
+    final = extract_min(minheap);
+    return final;
+}
+
 HuffmanTree *create_tree_from_header(char *header) {
     if (header == NULL) {
         fprintf(stderr, "ERROR null header while creating the tree\n");
@@ -202,12 +261,23 @@ HuffmanTree *create_tree_from_header(char *header) {
     // delimitador principal
     char *token = strtok(copy, "\x1D");
 
+    MinHeap *minheap = create_minheap();
+    HuffmanTree *temp, *result;
+
+    if (minheap == NULL) {
+        perror("While creating the tree from header");
+        return NULL;
+    }
+
     while (token != NULL) {
         int count;
         char character;
 
         if (sscanf(token, "%c\x1E%d", &character, &count) == 2) {
-            printf("%c-%d\n", character, count);
+            // AQUI ES DONDE HAY QUE CREAR LOS NODOS OTRA VEZ Y CONSTRUIR EL ARBOL
+            temp = create_leaf(count, character);
+            insert_key(minheap, temp);
+
         }
         else if (strcmp(token, "##") != 0) {
             fprintf(stderr, "ERROR format not matched while reading header, token: %s\n", token);
@@ -215,7 +285,9 @@ HuffmanTree *create_tree_from_header(char *header) {
         }
         token = strtok(NULL, "\x1D");
     }
+    result = create_tree_from_minheap(minheap);
 
     free(copy);
-    return NULL;
+    free(minheap);
+    return result;
 }

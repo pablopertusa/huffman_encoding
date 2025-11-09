@@ -56,18 +56,12 @@ int main(int argc, char** argv) {
     }
 
     // creamos el arbol de huffman
-    HuffmanTree *aux1, *aux2, *merge, *final;
-
-    int size;
-    while ((size = minheap->size) > 1) {
-        aux1 = extract_min(minheap);
-        aux2 = extract_min(minheap);
-        merge = merge_trees(aux1, aux2);
-        insert_key(minheap, merge);
-    }
-    final = extract_min(minheap);
+    HuffmanTree *final;
+    final = create_tree_from_minheap(minheap);
     free(minheap);
     minheap = NULL;
+
+    // creamos los códigos
     Code **codes = create_codes(final, ENCODING_LENGTH);
     if (codes == NULL) {
         fprintf(stderr, "NULL codes\n");
@@ -88,8 +82,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     char *header_string = traverse_tree(final);
-    free_tree(final);
-    final = NULL;
+    //free_tree(final);
+    //final = NULL;
     write_header(header_string, write_file);
     fclose(write_file);
 
@@ -141,6 +135,16 @@ int main(int argc, char** argv) {
     fclose(read_file);
 
     HuffmanTree *header_tree = create_tree_from_header(header_string);
+    if (header_tree == NULL) {
+        fprintf(stderr, "ERROR null tree from header\n");
+        return 1;
+    }
+    if (equal_trees(header_tree, final)) {
+        printf("son iguales\n");
+    }
+    else {
+        printf("son diferentes\n");
+    }
 
     return 0;
 }

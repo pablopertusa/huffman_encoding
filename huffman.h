@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+struct MinHeap;
+
 typedef struct Code {
     unsigned char character;
     int length;
@@ -33,6 +35,8 @@ void recursive_traverse(HuffmanTree *node, char *buffer);
 char *traverse_tree(HuffmanTree *tree);
 void write_header(char *header, FILE *out);
 int any_overflow(Code **codes, int encoding_length);
+HuffmanTree *create_tree_from_minheap(struct MinHeap *minheap);
 HuffmanTree *create_tree_from_header(char *string);
+bool equal_trees(HuffmanTree *t1, HuffmanTree *t2);
 
 #endif
