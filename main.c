@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
     FILE *read_file = fopen(filename, "r");
     if (read_file == NULL) {
         perror("error reading file");
-        fclose(read_file);
         return 1;
     }
 
@@ -73,17 +72,23 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // necesitamos el número de bits para el header
+    read_file = fopen(filename, "r");
+    if (read_file == NULL) {
+        perror("error reading file");
+        return 1;
+    }
+    long n_bits = get_number_bits_to_write(codes, read_file);
 
     FILE *write_file = fopen(output, "w");
     if (write_file == NULL) {
         perror("NULL output file");
-        fclose(write_file);
         return 1;
     }
     char *header_string = traverse_tree(final);
     //free_tree(final);
     //final = NULL;
-    write_header(header_string, write_file);
+    write_header(header_string, n_bits, write_file);
     fclose(write_file);
 
     EncodingBuffer *encoding_buffer = create_buffer();
@@ -95,13 +100,11 @@ int main(int argc, char** argv) {
     read_file = fopen(filename, "r");
     if (read_file == NULL) {
         perror("NULL input file");
-        fclose(read_file);
         return 1;
     }
     write_file = fopen(output, "ab");
     if (write_file == NULL) {
         perror("NULL output file");
-        fclose(write_file);
         return 1;
     }
     while ((read_c = getc(read_file)) != EOF) {
@@ -113,6 +116,8 @@ int main(int argc, char** argv) {
     }
     fclose(read_file);
     fclose(write_file);
+
+
     free_codes(codes, ENCODING_LENGTH);
     codes = NULL;
     free(encoding_buffer);
@@ -122,7 +127,6 @@ int main(int argc, char** argv) {
     read_file = fopen(output, "r");
     if (read_file == NULL) {
         perror("ERROR reading output file for decoding");
-        fclose(read_file);
         return 1;
     }
 

@@ -34,12 +34,13 @@ char *traverse_tree(HuffmanTree *tree);
 char *string_node(HuffmanTree *node);
 void recursive_traverse(HuffmanTree *node, char *buffer);
 char *traverse_tree(HuffmanTree *tree);
-void write_header(char *header, FILE *out);
+void write_header(char *header, long n_bits, FILE *out);
+long get_number_bits_to_write(Code **codes, FILE *stream);
 int any_overflow(Code **codes, int encoding_length);
 HuffmanTree *create_tree_from_minheap(struct MinHeap *minheap);
 HuffmanTree *create_tree_from_header(char *string);
 bool equal_trees(HuffmanTree *t1, HuffmanTree *t2);
-char *decode_file(HuffmanTree *tree, FILE *stream);
+//char *decode_file(HuffmanTree *tree, FILE *stream);
 unsigned char get_next_bit(unsigned char byte, int bits_read);
 
 #endif
