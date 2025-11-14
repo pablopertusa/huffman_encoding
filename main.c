@@ -20,8 +20,7 @@ int main(int argc, char** argv) {
         output = "out";
     }
     char *filename = argv[1];
-    char mode = 'r';
-    FILE *read_file = fopen(filename, &mode);
+    FILE *read_file = fopen(filename, "r");
     if (read_file == NULL) {
         perror("error reading file");
         fclose(read_file);

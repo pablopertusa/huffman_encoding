@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define READ_BUFFER_SIZE 4096
+
 struct MinHeap;
 
 typedef struct Code {
@@ -20,7 +22,6 @@ typedef struct HuffmanTree {
     struct HuffmanTree *left;
     struct HuffmanTree *right;
 } HuffmanTree;
-
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2);
 HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2);
@@ -38,5 +39,7 @@ int any_overflow(Code **codes, int encoding_length);
 HuffmanTree *create_tree_from_minheap(struct MinHeap *minheap);
 HuffmanTree *create_tree_from_header(char *string);
 bool equal_trees(HuffmanTree *t1, HuffmanTree *t2);
+char *decode_file(HuffmanTree *tree, FILE *stream);
+unsigned char get_next_bit(unsigned char byte, int bits_read);
 
 #endif
