@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 
 EncodingBuffer *create_buffer() {
@@ -94,4 +95,35 @@ char *read_header(FILE *input) {
     }
     buffer[buffer_used] = '\0';
     return buffer;
+}
+
+long get_number_bits_from_header(char *filename) {
+    FILE *stream = fopen(filename, "r");
+    if (stream == NULL) {
+        perror("while opening file to extract number of bits");
+        return -1;
+    }
+
+    int c;
+    int last = 'i';
+    while ((c = fgetc(stream)) != EOF) {
+        if (last == '#' && c == '#') {
+            break;
+        }
+        last = c;
+    }
+    if (c == EOF) {
+        fprintf(stderr, "ERROR delimiter not found in file\n");
+        fclose(stream);
+        return -1;
+    }
+    long number;
+    if (fscanf(stream, "%ld", &number) != 1) {
+        fprintf(stderr, "ERROR number of bits not found in file\n");
+        fclose(stream);
+        return -1;
+    }
+
+    fclose(stream);
+    return number;
 }

@@ -3,7 +3,7 @@
 #include "huffman.h"
 #include <string.h>
 #include "minheap.h"
-//#include "utils.h"
+#include "utils.h"
 
 bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
     if (t1 == NULL || t2 == NULL) {
@@ -306,55 +306,70 @@ HuffmanTree *create_tree_from_header(char *header) {
     return result;
 }
 
-//char *decode_file(HuffmanTree *tree, FILE *stream) {
-    //if (tree == NULL || stream == NULL) {
-        //fprintf(stderr, "ERROR null tree or stream while decoding\n");
-        //return NULL;
-    //}
-    //unsigned char buffer[READ_BUFFER_SIZE];
-    //size_t n_bytes;
-    //unsigned char byte, bit;
-    //HuffmanTree *node = tree;
-    //DecodingBuffer *decoding_buffer = create_decoding_buffer();
-    //if (decoding_buffer == NULL) {
-        //perror("error creating decoding buffer");
-        //fclose(stream);
-        //return NULL;
-    //}
+char *decode_file(HuffmanTree *tree, char *filename) {
+    FILE *stream = fopen(filename, "rb");
+    if (tree == NULL || stream == NULL) {
+        fprintf(stderr, "ERROR null tree or stream while decoding\n");
+        return NULL;
+    }
 
-    //// aquí hay que saber cuántos bits son válidos, porque no tienen por qué ser múltiplos de 8
-    //// lo que daría un error en el último byte
-    //while ((n_bytes = fread(buffer, sizeof(unsigned char), READ_BUFFER_SIZE, stream)) > 0) {
-        //for (int i = 0; i < n_bytes; i++) {
-            //byte = buffer[i];
-            //for (int b = 0; b < BYTE_SIZE; b++) {
-                //if (node == NULL) {
-                    //fprintf(stderr, "ERROR null node while decoding, unexpected behaviour\n");
-                    //free_decoding_buffer(decoding_buffer);
-                    //fclose(stream);
-                    //return NULL;
-                //}
-                //else if (node->is_leaf) {
-                    //append_decoding_buffer(decoding_buffer, node->character);
-                    //node = tree;
-                //}
-                //bit = get_next_bit(byte, b);
-                //if (bit == 0) {
-                    //node = node->left;
-                //}
-                //else if (bit == 1) {
-                    //node = node->right;
-                //}
-            //}
-        //}
-    //}
+    long number_bits = get_number_bits_from_header(filename);
+    if (number_bits == -1) {
+        fprintf(stderr, "ERROR number of bits not found in header\n");
+        return NULL;
+    }
 
-    //if (ferror(stream)) {
-        //perror("error reading decoding file");
-        //fclose(stream);
-        //return NULL;
-    //}
+    // leemos primero la parte del header
+    int c;
+    int last = 'i';
+    while ((c = fgetc(stream)) != EOF) {
+        if (last == '/' && c == '/') {
+            break;
+        }
+        last = c;
+    }
 
-    //fclose(stream);
-    //return decoding_buffer->data;
-//}
+    unsigned char buffer[READ_BUFFER_SIZE];
+    size_t n_bytes;
+    unsigned char byte, bit;
+    HuffmanTree *node = tree;
+    DecodingBuffer *decoding_buffer = create_decoding_buffer();
+    if (decoding_buffer == NULL) {
+        perror("error creating decoding buffer");
+        fclose(stream);
+        return NULL;
+    }
+    while ((n_bytes = fread(buffer, sizeof(unsigned char), READ_BUFFER_SIZE, stream)) > 0) {
+        for (int i = 0; i < n_bytes; i++) {
+            byte = buffer[i];
+            for (int b = 0; b < BYTE_SIZE; b++) {
+                if (node == NULL) {
+                    fprintf(stderr, "ERROR null node while decoding, unexpected behaviour\n");
+                    free_decoding_buffer(decoding_buffer);
+                    fclose(stream);
+                    return NULL;
+                }
+                else if (node->is_leaf) {
+                    append_decoding_buffer(decoding_buffer, node->character);
+                    node = tree;
+                }
+                bit = get_next_bit(byte, b);
+                if (bit == 0) {
+                    node = node->left;
+                }
+                else if (bit == 1) {
+                    node = node->right;
+                }
+            }
+        }
+    }
+
+    if (ferror(stream)) {
+        perror("error reading decoding file");
+        fclose(stream);
+        return NULL;
+    }
+
+    fclose(stream);
+    return decoding_buffer->data;
+}

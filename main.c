@@ -149,5 +149,7 @@ int main(int argc, char** argv) {
         printf("son diferentes\n");
     }
 
+    char *decoded_string = decode_file(header_tree, output);
+
     return 0;
 }
