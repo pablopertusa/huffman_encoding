@@ -3,6 +3,8 @@
 
 #define BYTE_SIZE 8
 #define ENCODING_BUFFER_LENGTH 64
+#define DECODING_BUFFER_INITAL_LENGTH 1024
+#define DECODING_BUFFER_GROWTH_FACTOR 2
 
 #include <stdint.h>
 #include <stdio.h>
@@ -26,5 +28,7 @@ void append_decoding_buffer(DecodingBuffer *buffer, char character);
 DecodingBuffer *create_decoding_buffer();
 void free_decoding_buffer(DecodingBuffer *buffer);
 long get_number_bits_from_header(char *filename);
+void terminate_decoding_buffer(DecodingBuffer *buffer);
+unsigned char get_next_bit(unsigned char byte, int bits_read);
 
 #endif

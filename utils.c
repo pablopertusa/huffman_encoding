@@ -1,7 +1,7 @@
+#include <stdbool.h>
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 
 EncodingBuffer *create_buffer() {
@@ -126,4 +126,79 @@ long get_number_bits_from_header(char *filename) {
 
     fclose(stream);
     return number;
+}
+
+DecodingBuffer *create_decoding_buffer() {
+    DecodingBuffer *buffer = (DecodingBuffer *)malloc(sizeof(DecodingBuffer));
+    if (buffer == NULL) {
+        perror("while creating decoding buffer");
+        return NULL;
+    }
+    char *data = (char *)calloc(DECODING_BUFFER_INITAL_LENGTH, sizeof(char));
+    if (data == NULL) {
+        free(buffer);
+        perror("while creating decoding buffer");
+        return NULL;
+    }
+    buffer->data = data;
+    buffer->size = DECODING_BUFFER_INITAL_LENGTH;
+    buffer->used = 0;
+    return buffer;
+}
+
+void free_decoding_buffer(DecodingBuffer *buffer) {
+    if (buffer == NULL) {
+        fprintf(stderr, "ERROR trying to free a null buffer\n");
+        return;
+    }
+    if (buffer->data != NULL) {
+        free(buffer->data);
+    }
+    free(buffer);
+}
+
+void append_decoding_buffer(DecodingBuffer *buffer, char character) {
+    if (buffer == NULL) {
+        fprintf(stderr, "ERROR trying to append to a null buffer\n");
+        return;
+    }
+    if (buffer->data == NULL) {
+        fprintf(stderr, "ERROR trying to append to a null data in buffer\n");
+        return;
+    }
+    if (buffer->used == buffer->size - 1) {
+        size_t new_size = buffer->size * DECODING_BUFFER_GROWTH_FACTOR;
+        
+        char *new_data = (char *)realloc(buffer->data, new_size * sizeof(char));
+        if (new_data == NULL) {
+            perror("Error during realloc of decoding buffer");
+            return;
+        }
+        buffer->data = new_data;
+        buffer->size = new_size;
+    }
+    buffer->data[buffer->used] = character;
+    buffer->used++;
+}
+
+void terminate_decoding_buffer(DecodingBuffer *buffer) {
+    if (buffer == NULL) {
+        fprintf(stderr, "ERROR trying to add terminate char to a null buffer\n");
+        return;
+    }
+    if (buffer->data == NULL) {
+        fprintf(stderr, "ERROR trying to add terminate char to a null data in buffer\n");
+        return;
+    }
+    buffer->data[buffer->used] = '\0';
+}
+
+unsigned char get_next_bit(unsigned char byte, int bits_read) {
+    if (bits_read >= 8 || bits_read < 0) {
+        fprintf(stderr, "ERROR invalid number of bits read\n");
+        return 2;
+    }
+    int shift = BYTE_SIZE - bits_read - 1;
+    unsigned char bit = (unsigned char)(byte >> shift & 1);
+    return bit;
 }

@@ -33,7 +33,7 @@ HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
     new_tree->left = t1;
     new_tree->right = t2;
     // ponemos un char que es un placeholder, esto es para que la creación del árbol sea única
-    new_tree->character = 'm';
+    new_tree->character = 'i';
 
     return new_tree;
 }
@@ -316,6 +316,7 @@ char *decode_file(HuffmanTree *tree, char *filename) {
     long number_bits = get_number_bits_from_header(filename);
     if (number_bits == -1) {
         fprintf(stderr, "ERROR number of bits not found in header\n");
+        fclose(stream);
         return NULL;
     }
 
@@ -329,6 +330,7 @@ char *decode_file(HuffmanTree *tree, char *filename) {
         last = c;
     }
 
+    // aquí empezamos a decodificar la parte comprimida
     unsigned char buffer[READ_BUFFER_SIZE];
     size_t n_bytes;
     unsigned char byte, bit;
@@ -339,10 +341,29 @@ char *decode_file(HuffmanTree *tree, char *filename) {
         fclose(stream);
         return NULL;
     }
+    long bits_read = 0;
     while ((n_bytes = fread(buffer, sizeof(unsigned char), READ_BUFFER_SIZE, stream)) > 0) {
         for (int i = 0; i < n_bytes; i++) {
             byte = buffer[i];
             for (int b = 0; b < BYTE_SIZE; b++) {
+                if (bits_read > number_bits) {
+                    fclose(stream);
+                    terminate_decoding_buffer(decoding_buffer);
+                    return decoding_buffer->data;
+                }
+                bit = get_next_bit(byte, b);
+                bits_read++;
+                if (bit == 0) {
+                    node = node->left;
+                }
+                else if (bit == 1) {
+                    node = node->right;
+                }
+                else {
+                    fprintf(stderr, "ERROR extracting bit while decoding\n");
+                    fclose(stream);
+                    return NULL;
+                }
                 if (node == NULL) {
                     fprintf(stderr, "ERROR null node while decoding, unexpected behaviour\n");
                     free_decoding_buffer(decoding_buffer);
@@ -352,13 +373,6 @@ char *decode_file(HuffmanTree *tree, char *filename) {
                 else if (node->is_leaf) {
                     append_decoding_buffer(decoding_buffer, node->character);
                     node = tree;
-                }
-                bit = get_next_bit(byte, b);
-                if (bit == 0) {
-                    node = node->left;
-                }
-                else if (bit == 1) {
-                    node = node->right;
                 }
             }
         }
@@ -371,5 +385,6 @@ char *decode_file(HuffmanTree *tree, char *filename) {
     }
 
     fclose(stream);
+    terminate_decoding_buffer(decoding_buffer);
     return decoding_buffer->data;
 }

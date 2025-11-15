@@ -150,6 +150,12 @@ int main(int argc, char** argv) {
     }
 
     char *decoded_string = decode_file(header_tree, output);
-
+    char *decoded_filename = "decoded_file";
+    FILE *decoded_file = fopen(decoded_filename, "wb");
+    if (decoded_file == NULL) {
+        fprintf(stderr, "problem opening decoded\n");
+        return 1;
+    }
+    fputs(decoded_string, decoded_file);
     return 0;
 }

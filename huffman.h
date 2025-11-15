@@ -41,6 +41,5 @@ HuffmanTree *create_tree_from_minheap(struct MinHeap *minheap);
 HuffmanTree *create_tree_from_header(char *string);
 bool equal_trees(HuffmanTree *t1, HuffmanTree *t2);
 char *decode_file(HuffmanTree *tree, char *filename);
-unsigned char get_next_bit(unsigned char byte, int bits_read);
 
 #endif
