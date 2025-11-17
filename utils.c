@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 EncodingBuffer *create_buffer() {
@@ -20,10 +21,10 @@ void append_buffer(EncodingBuffer *buffer, uint32_t code, int n_bits) {
         printf("ERROR invalid n_bits appending to buffer\n");
         return;
     }
-    uint32_t bits_to_add = code & ((1U << n_bits) - 1);
+    uint64_t bits_to_add = code & ((1U << n_bits) - 1);
 
     if ((64 - buffer->used) < n_bits) {
-        printf("ERROR too many n_bits appending to buffer\n");
+        fprintf(stderr, "ERROR too many n_bits appending to buffer\n");
         return;
     }
 
@@ -40,21 +41,14 @@ void write_buffer(EncodingBuffer *buffer, FILE *output) {
         
         int shift = buffer->used - BYTE_SIZE;
         
-        unsigned char byte_to_write = (unsigned char)((buffer->data >> shift) & 0xFFULL);
+        unsigned char byte_to_write = (unsigned char)((buffer->data >> shift) & 0xFFU);
         
         if (fputc(byte_to_write, output) == EOF) {
-            printf("ERROR writing bytes to file\n");
+            fprintf(stderr, "ERROR writing bytes to file\n");
             return;
         }
         
         buffer->used -= BYTE_SIZE;
-    }
-    
-    if (buffer->used > 0) {
-        int bits_written = bytes_to_write * BYTE_SIZE;
-        buffer->data >>= bits_written; 
-    } else {
-        buffer->data = 0;
     }
 }
 
@@ -75,7 +69,7 @@ char *read_header(FILE *input) {
     char *temp;
     char last = '\0';
     char current;
-    // el . marca el final de header
+
     while ((c = getc(input)) != EOF) {
         if (buffer_used >= buffer_size - 1) {
             buffer_size *= 2;
@@ -201,4 +195,52 @@ unsigned char get_next_bit(unsigned char byte, int bits_read) {
     int shift = BYTE_SIZE - bits_read - 1;
     unsigned char bit = (unsigned char)(byte >> shift & 1);
     return bit;
+}
+
+char *string_counter(long *counter, int encoding_length) {
+
+    size_t max_size = 1048576;
+    char record_sep = 30;
+    char group_sep = 29;
+
+    char *result_string = (char *)malloc(max_size);
+    if (result_string == NULL) {
+        return NULL;
+    }
+
+    size_t current_len = 0;
+
+    for (int i = 0; i < encoding_length; i++) {
+        long weight = counter[i];
+        
+        if (weight > 0) {
+            char character = (char)i;
+            char temp_buffer[20];
+
+            int written = snprintf(
+                temp_buffer, 
+                sizeof(temp_buffer), 
+                "%c%c%ld%c", 
+                character, 
+                record_sep, 
+                weight, 
+                group_sep
+            );
+            
+            if (current_len + written < max_size) {
+                strcat(result_string, temp_buffer);
+                current_len += written;
+            } else {
+                fprintf(stderr, "Advertencia: String de conteo ha excedido el tamaño máximo.\n");
+                return NULL;
+            }
+        }
+    }
+    
+    char *final_string = (char *)realloc(result_string, current_len + 1);
+    if (final_string != NULL) {
+        return final_string;
+    } else {
+        return result_string;
+    }
 }

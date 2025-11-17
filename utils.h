@@ -30,5 +30,6 @@ void free_decoding_buffer(DecodingBuffer *buffer);
 long get_number_bits_from_header(char *filename);
 void terminate_decoding_buffer(DecodingBuffer *buffer);
 unsigned char get_next_bit(unsigned char byte, int bits_read);
+char *string_counter(long *counter, int encoding_length);
 
 #endif

@@ -85,10 +85,11 @@ int main(int argc, char** argv) {
         perror("NULL output file");
         return 1;
     }
-    char *header_string = traverse_tree(final);
-    //free_tree(final);
-    //final = NULL;
+    
+    char *header_string = string_counter(counter, ENCODING_LENGTH);
     write_header(header_string, n_bits, write_file);
+    free_tree(final);
+    final = NULL;
     fclose(write_file);
 
     EncodingBuffer *encoding_buffer = create_buffer();
@@ -109,11 +110,12 @@ int main(int argc, char** argv) {
     }
     while ((read_c = getc(read_file)) != EOF) {
         code = codes[read_c];
-        if (code->length > (ENCODING_BUFFER_LENGTH - encoding_buffer->used)) {
+        if (code->length >= (ENCODING_BUFFER_LENGTH - encoding_buffer->used)) {
             write_buffer(encoding_buffer, write_file);
         }
         append_buffer(encoding_buffer, code->bits, code->length);
     }
+    write_buffer(encoding_buffer, write_file);
     fclose(read_file);
     fclose(write_file);
 
@@ -142,18 +144,17 @@ int main(int argc, char** argv) {
         fprintf(stderr, "ERROR null tree from header\n");
         return 1;
     }
-    if (equal_trees(header_tree, final)) {
-        printf("son iguales\n");
-    }
-    else {
-        printf("son diferentes\n");
-    }
+
+    //if (!equal_trees(header_tree, final)) {
+        //fprintf(stderr, "ERROR while recreating the tree\n");
+        //return 1;
+    //}
 
     char *decoded_string = decode_file(header_tree, output);
     char *decoded_filename = "decoded_file";
     FILE *decoded_file = fopen(decoded_filename, "wb");
     if (decoded_file == NULL) {
-        fprintf(stderr, "problem opening decoded\n");
+        fprintf(stderr, "ERROR problem opening decoded\n");
         return 1;
     }
     fputs(decoded_string, decoded_file);

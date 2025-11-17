@@ -30,10 +30,15 @@ HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
 
     new_tree->is_leaf = false;
     new_tree->weight = t1->weight + t2->weight;
-    new_tree->left = t1;
-    new_tree->right = t2;
+    if (is_less(t1, t1)) {
+        new_tree->left = t1;
+        new_tree->right = t2;
+    } else {
+        new_tree->left = t2;
+        new_tree->right = t1;
+    }
     // ponemos un char que es un placeholder, esto es para que la creación del árbol sea única
-    new_tree->character = 'i';
+    new_tree->character = -1;
 
     return new_tree;
 }
@@ -126,6 +131,7 @@ Code **create_codes(HuffmanTree *tree, int n) {
         }
         new_code->bits = 0;
         new_code->length = 0;
+        new_code->character = (unsigned char)i;
         codes_array[i] = new_code;
     }
 
