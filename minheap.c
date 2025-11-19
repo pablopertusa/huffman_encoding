@@ -61,7 +61,7 @@ void heapify_up(MinHeap *h, int i) {
 
 void insert_key(MinHeap *h, HuffmanTree *key) {
     if (h->size == MAX_SIZE) {
-        printf("Error: Heap lleno\n");
+        fprintf(stderr, "Error: Heap lleno\n");
         return;
     }
 

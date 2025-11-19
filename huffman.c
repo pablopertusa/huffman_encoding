@@ -18,13 +18,13 @@ bool is_less(HuffmanTree *t1, HuffmanTree *t2) {
 
 HuffmanTree *merge_trees(HuffmanTree *t1, HuffmanTree *t2) {
     if (t1 == NULL || t2 == NULL) {
-        printf("WARNING: una comparación ha recibido un tree a NULL\n");
+        fprintf(stderr, "ERROR null comparision\n");
         return NULL;
     }
     HuffmanTree *new_tree = (HuffmanTree *)malloc(sizeof(HuffmanTree));
 
     if (new_tree == NULL) {
-        printf("la asignación de memoria para un tree ha fallado\n");
+        perror("while merging trees\n");
         return NULL;
     }
 
@@ -48,7 +48,7 @@ bool equal_trees(HuffmanTree *t1, HuffmanTree *t2) {
         return true;
     }
     else if (t1 == NULL || t2 == NULL) {
-        printf("uno es nulo y el otro no\n");
+        fprintf(stderr, "one tree is null in equal_trees\n");
         return false;
     }
     bool is_leaf_1 = t1->is_leaf;
@@ -69,7 +69,7 @@ bool equal_trees(HuffmanTree *t1, HuffmanTree *t2) {
 HuffmanTree *create_leaf(int weight, unsigned char character) {
     HuffmanTree *new_leaf = (HuffmanTree *)malloc(sizeof(HuffmanTree));
     if (new_leaf == NULL) {
-        printf("error allocating memory to leaf\n");
+        perror("while creating a leaf");
         return NULL;
     }
     new_leaf->weight = weight;
@@ -92,7 +92,7 @@ void free_tree(HuffmanTree *node) {
 
 void recursive_codes(Code **array, HuffmanTree *node, uint32_t acum_code, int length) {
     if (node == NULL || array == NULL) {
-        printf("recursive codes received NULL");
+        fprintf(stderr, "recursive codes received NULL");
         return;
     }
     HuffmanTree *r,*l;
@@ -121,12 +121,12 @@ Code **create_codes(HuffmanTree *tree, int n) {
     // n va a ser el tamaño del encoding, en este caso como es ASCII el índice de cada carácter será su valor
     Code **codes_array = (Code **)malloc(sizeof(Code *) * n);
     if (codes_array == NULL) {
-        printf("error allocating memory while creating the codes\n");
+        perror("error allocating memory while creating the codes\n");
     }
     for (int i = 0; i < n; i++) {
         Code *new_code = (Code *)malloc(sizeof(Code));
         if (new_code == NULL) {
-            printf("error allocating memory while creating a code\n");
+            fprintf(stderr, "error allocating memory while creating a code\n");
             return NULL;
         }
         new_code->bits = 0;
@@ -211,7 +211,7 @@ char *traverse_tree(HuffmanTree *tree) {
 
 void write_header(char *header, long n_bits, FILE *out) {
     if (header == NULL) {
-        printf("NULL header\n");
+        fprintf(stderr, "NULL header\n");
         return;
     }
     fputs(header, out);

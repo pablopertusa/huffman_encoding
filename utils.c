@@ -8,7 +8,7 @@
 EncodingBuffer *create_buffer() {
     EncodingBuffer *buffer = (EncodingBuffer *)malloc(sizeof(EncodingBuffer));
     if (buffer == NULL) {
-        printf("ERROR allocating memory to encoding buffer\n");
+        perror("ERROR allocating memory to encoding buffer\n");
         return NULL;
     }
     buffer->data = 0;
@@ -18,7 +18,7 @@ EncodingBuffer *create_buffer() {
 
 void append_buffer(EncodingBuffer *buffer, uint32_t code, int n_bits) {
     if (n_bits < 0 || n_bits > 32) {
-        printf("ERROR invalid n_bits appending to buffer\n");
+        fprintf(stderr, "ERROR invalid n_bits appending to buffer\n");
         return;
     }
     uint64_t bits_to_add = code & ((1U << n_bits) - 1);
